@@ -1,0 +1,80 @@
+!-- templates/index.html -->
+{% extends "base.html" %}
+
+{% block title %}Home - Power Electronics Design Tool{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="jumbotron">
+            <h1 class="display-4">Power Electronics Design Tool</h1>
+            <p class="lead">Design and simulate power electronic circuits for switches and converters</p>
+            <hr class="my-4">
+            <p>This tool helps you design, simulate, and analyze various power electronics circuits including buck converters, boost converters, and more.</p>
+            <a class="btn btn-primary btn-lg" href="{{ url_for('editor') }}" role="button">Start Designing</a>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Circuit Design</h5>
+                <p class="card-text">Create your power electronics circuit using our drag-and-drop editor.</p>
+                <a href="{{ url_for('editor') }}" class="btn btn-primary">Go to Editor</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Component Library</h5>
+                <p class="card-text">Browse our library of power electronic components and converter topologies.</p>
+                <a href="{{ url_for('component_library') }}" class="btn btn-primary">View Library</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Simulation</h5>
+                <p class="card-text">Simulate your circuit design and analyze the results.</p>
+                <a href="{{ url_for('editor') }}" class="btn btn-primary">Simulate</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-12">
+        <h2>Featured Converter Topologies</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Buck Converter</h5>
+                        <p class="card-text">Step-down DC-DC converter for reducing voltage levels.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Boost Converter</h5>
+                        <p class="card-text">Step-up DC-DC converter for increasing voltage levels.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Buck-Boost Converter</h5>
+                        <p class="card-text">Versatile converter that can step voltage up or down.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,145 @@
+/* static/css/style.css */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+.jumbotron {
+    padding: 2rem;
+    background-color: #e9ecef;
+    border-radius: 0.3rem;
+    margin-bottom: 2rem;
+}
+
+/* Component library styles */
+.component-card {
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+.component-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Circuit editor styles */
+.component-palette {
+    min-height: 300px;
+}
+
+.circuit-canvas {
+    min-height: 600px;
+    border: 1px solid #ddd;
+    background-color: #f8f9fa;
+    position: relative;
+    overflow: auto;
+}
+
+.simulation-plot {
+    width: 100%;
+    height: 300px;
+    border: 1px solid #ddd;
+}
+
+/* static/css/editor.css */
+/* Component styles */
+.component {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background-color: white;
+    border: 1px solid #333;
+    border-radius: 5px;
+    text-align: center;
+    padding: 5px;
+    cursor: move;
+    z-index: 10;
+}
+
+.component-palette .component {
+    position: relative;
+    margin: 10px auto;
+    cursor: grab;
+}
+
+.component-icon {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.component-name {
+    font-size: 10px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.component-selected {
+    border: 2px solid #0d6efd;
+    box-shadow: 0 0 5px rgba(13, 110, 253, 0.5);
+}
+
+/* Terminal styles */
+.terminal {
+    width: 10px;
+    height: 10px;
+    background-color: #333;
+    border-radius: 50%;
+    position: absolute;
+    z-index: 11;
+}
+
+/* Specific component visuals */
+.resistor-icon {
+    background-image: url('/static/img/resistor.svg');
+}
+
+.capacitor-icon {
+    background-image: url('/static/img/capacitor.svg');
+}
+
+.inductor-icon {
+    background-image: url('/static/img/inductor.svg');
+}
+
+.diode-icon {
+    background-image: url('/static/img/diode.svg');
+}
+
+.mosfet-icon {
+    background-image: url('/static/img/mosfet.svg');
+}
+
+.igbt-icon {
+    background-image: url('/static/img/igbt.svg');
+}
+
+.voltage-source-icon {
+    background-image: url('/static/img/voltage-source.svg');
+}
+
+.pwm-source-icon {
+    background-image: url('/static/img/pwm-source.svg');
+}
+
+/* Connection styles */
+.jtk-connector {
+    z-index: 5;
+}
+
+.jtk-endpoint {
+    z-index: 6;
+}
+
+.jtk-overlay {
+    z-index: 7;
+}

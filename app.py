@@ -1,193 +1,143 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+# app.py
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
+import os
 import json
 import numpy as np
-import matplotlib
-matplotlib.use('Agg')  # Use non-interactive backend
-import matplotlib.pyplot as plt
-from io import BytesIO
-import base64
-
-# Import your simulation models
-from models.core import CircuitSimulator
-from models.components import Resistor, VoltageSource, Diode, MOSFET, Capacitor, Inductor, PWM
-from models.converters import BuckConverter, BoostConverter, BuckBoostConverter
-from models.analysis import SwitchLossCalculator, ThermalModel, EfficiencyCalculator, FFTAnalyzer
+from config import Config
+from models.circuit import Circuit
+from models.component import Component, Resistor, Capacitor, Inductor, Diode, MOSFET, IGBT
+from models.simulation import SimulationResult
+from simulation.engine import simulate_circuit
 
 app = Flask(__name__)
+app.config.from_object(Config)
 
-# Home page
+# Ensure upload folder exists
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+# Store current circuit in session
+current_circuit = None
+
 @app.route('/')
 def index():
+    """Home page with introduction and navigation."""
     return render_template('index.html')
 
-# Simulation configuration page
-@app.route('/simulate', methods=['GET', 'POST'])
-def simulate():
+@app.route('/editor', methods=['GET', 'POST'])
+def editor():
+    """Circuit editor page."""
+    global current_circuit
+    
     if request.method == 'POST':
-        # Get form data and redirect to results
-        return redirect(url_for('results'))
+        # Process circuit data from the editor
+        circuit_data = request.json
+        current_circuit = Circuit.from_json(circuit_data)
+        return jsonify({"status": "success"})
     
-    # GET request - show simulation form
-    return render_template('simulation.html')
+    return render_template('editor.html')
 
-# Run simulation and show results
-@app.route('/results', methods=['POST'])
-def results():
-    # Get simulation parameters from form
-    circuit_type = request.form.get('circuit_type', 'buck')
-    input_voltage = float(request.form.get('input_voltage', 24))
-    frequency = float(request.form.get('frequency', 100000))
-    duty_cycle = float(request.form.get('duty_cycle', 0.5))
-    inductance = float(request.form.get('inductance', 100)) * 1e-6  # Convert to H
-    capacitance = float(request.form.get('capacitance', 470)) * 1e-6  # Convert to F
-    load_resistance = float(request.form.get('load', 10))
+@app.route('/simulate', methods=['POST'])
+def simulate():
+    """Run simulation based on current circuit."""
+    global current_circuit
     
-    sim_time = float(request.form.get('sim_time', 1)) / 1000  # Convert to seconds
-    step_size = float(request.form.get('step_size', 0.1)) / 1000000  # Convert to seconds
+    if not current_circuit:
+        flash("No circuit to simulate.")
+        return redirect(url_for('editor'))
     
-    # Run simulation based on circuit type
-    if circuit_type == 'buck':
-        converter = BuckConverter(input_voltage, frequency, duty_cycle)
-        results = converter.simulate(sim_time, step_size)
-    elif circuit_type == 'boost':
-        converter = BoostConverter(input_voltage, frequency, duty_cycle)
-        results = converter.simulate(sim_time, step_size)
-    elif circuit_type == 'buckboost':
-        converter = BuckBoostConverter(input_voltage, frequency, duty_cycle)
-        results = converter.simulate(sim_time, step_size)
-    else:
-        return "Invalid circuit type", 400
-    
-    # Generate plots
-    plots = generate_plots(results)
-    
-    # Calculate efficiency and other metrics
-    metrics = calculate_metrics(results)
-    
-    return render_template('results.html', 
-                           plots=plots, 
-                           metrics=metrics,
-                           params=request.form)
-
-def generate_plots(results):
-    plots = {}
-    
-    # Voltage and current waveforms
-    plt.figure(figsize=(10, 6))
-    
-    # Convert time to milliseconds for display
-    time_ms = results['time'] * 1000
-    
-    # Plot voltage
-    ax1 = plt.gca()
-    ax1.plot(time_ms, results['output_voltage'], 'b-', label='Output Voltage (V)')
-    ax1.set_xlabel('Time (ms)')
-    ax1.set_ylabel('Voltage (V)', color='b')
-    ax1.tick_params(axis='y', labelcolor='b')
-    
-    # Add current on secondary y-axis
-    ax2 = ax1.twinx()
-    ax2.plot(time_ms, results['inductor_current'], 'r-', label='Inductor Current (A)')
-    ax2.set_ylabel('Current (A)', color='r')
-    ax2.tick_params(axis='y', labelcolor='r')
-    
-    # Add switch state markers
-    switch_on_times = time_ms[results['switch_state']]
-    switch_off_times = time_ms[~results['switch_state']]
-    
-    if len(switch_on_times) > 0:
-        ax1.plot(switch_on_times, np.zeros_like(switch_on_times), 'g|', markersize=10)
-    if len(switch_off_times) > 0:
-        ax1.plot(switch_off_times, np.zeros_like(switch_off_times), 'k|', markersize=10)
-    
-    # Add legend
-    lines1, labels1 = ax1.get_legend_handles_labels()
-    lines2, labels2 = ax2.get_legend_handles_labels()
-    ax1.legend(lines1 + lines2, labels1 + labels2, loc='upper right')
-    
-    plt.title('Converter Waveforms')
-    plt.grid(True)
-    plt.tight_layout()
-    
-    # Save plot to a base64 string
-    buffer = BytesIO()
-    plt.savefig(buffer, format='png')
-    buffer.seek(0)
-    plots['waveforms'] = base64.b64encode(buffer.getvalue()).decode('utf-8')
-    plt.close()
-    
-    # Generate FFT plot for output voltage ripple
-    plt.figure(figsize=(10, 6))
-    
-    # Get only the steady-state part of the waveform
-    steady_idx = int(len(results['time']) * 0.5)  # Skip first half for startup transients
-    steady_voltage = results['output_voltage'][steady_idx:]
-    steady_time = results['time'][steady_idx:]
-    
-    # Calculate average voltage to find ripple
-    avg_voltage = np.mean(steady_voltage)
-    ripple = steady_voltage - avg_voltage
-    
-    # Calculate FFT
-    time_step = steady_time[1] - steady_time[0]
-    freqs, amps = FFTAnalyzer.calculate_fft(ripple, time_step)
-    
-    # Plot only up to 10x the switching frequency
-    max_freq_idx = np.searchsorted(freqs, 10 * results.get('frequency', frequency))
-    plt.plot(freqs[:max_freq_idx]/1000, amps[:max_freq_idx])
-    plt.xlabel('Frequency (kHz)')
-    plt.ylabel('Amplitude (V)')
-    plt.title('Output Voltage Ripple Spectrum')
-    plt.grid(True)
-    plt.tight_layout()
-    
-    # Save plot to a base64 string
-    buffer = BytesIO()
-    plt.savefig(buffer, format='png')
-    buffer.seek(0)
-    plots['fft'] = base64.b64encode(buffer.getvalue()).decode('utf-8')
-    plt.close()
-    
-    return plots
-
-def calculate_metrics(results):
-    metrics = {}
-    
-    # Calculate average values (use only steady-state)
-    steady_idx = int(len(results['time']) * 0.5)  # Skip first half
-    avg_voltage = np.mean(results['output_voltage'][steady_idx:])
-    avg_current = np.mean(results['inductor_current'][steady_idx:])
-    
-    # Calculate ripple
-    voltage_ripple = np.max(results['output_voltage'][steady_idx:]) - np.min(results['output_voltage'][steady_idx:])
-    current_ripple = np.max(results['inductor_current'][steady_idx:]) - np.min(results['inductor_current'][steady_idx:])
-    
-    voltage_ripple_percent = (voltage_ripple / avg_voltage) * 100
-    current_ripple_percent = (current_ripple / avg_current) * 100
-    
-    metrics['avg_voltage'] = round(avg_voltage, 2)
-    metrics['avg_current'] = round(avg_current, 2)
-    metrics['voltage_ripple'] = round(voltage_ripple, 3)
-    metrics['voltage_ripple_percent'] = round(voltage_ripple_percent, 2)
-    metrics['current_ripple'] = round(current_ripple, 3)
-    metrics['current_ripple_percent'] = round(current_ripple_percent, 2)
-    
-    # Calculate output power
-    output_power = avg_voltage * avg_current
-    metrics['output_power'] = round(output_power, 2)
-    
-    return metrics
-
-# API endpoint to run simulation and return JSON results
-@app.route('/api/simulate', methods=['POST'])
-def api_simulate():
-    # Get parameters from JSON request
-    params = request.json
+    # Get simulation parameters
+    simulation_params = request.json
     
     # Run simulation
-    # ... (similar to results route but returning JSON)
+    try:
+        result = simulate_circuit(
+            current_circuit,
+            end_time=simulation_params.get('end_time', app.config['MAX_SIMULATION_TIME']),
+            step_size=simulation_params.get('step_size', app.config['DEFAULT_STEP_SIZE'])
+        )
+        
+        # Convert result to JSON for the frontend
+        result_data = result.to_json()
+        return jsonify(result_data)
     
-    return jsonify({"status": "success", "results": {}})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+@app.route('/save_circuit', methods=['POST'])
+def save_circuit():
+    """Save current circuit to file."""
+    global current_circuit
+    
+    if not current_circuit:
+        return jsonify({"error": "No circuit to save"}), 400
+    
+    try:
+        filename = request.json.get('filename', 'circuit.json')
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        
+        with open(filepath, 'w') as f:
+            json.dump(current_circuit.to_json(), f, indent=2)
+        
+        return jsonify({"status": "success", "message": f"Saved as {filename}"})
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+@app.route('/load_circuit', methods=['POST'])
+def load_circuit():
+    """Load circuit from file."""
+    global current_circuit
+    
+    if 'file' not in request.files:
+        return jsonify({"error": "No file provided"}), 400
+    
+    file = request.files['file']
+    
+    if file.filename == '':
+        return jsonify({"error": "No file selected"}), 400
+    
+    if file and '.' in file.filename and file.filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']:
+        try:
+            circuit_data = json.load(file)
+            current_circuit = Circuit.from_json(circuit_data)
+            return jsonify({"status": "success", "circuit": circuit_data})
+        
+        except Exception as e:
+            return jsonify({"error": str(e)}), 400
+    
+    return jsonify({"error": "Invalid file format"}), 400
+
+@app.route('/component_library')
+def component_library():
+    """Component library page."""
+    return render_template('library.html')
+
+@app.route('/get_components')
+def get_components():
+    """Return available components for the editor."""
+    components = {
+        "passive": [
+            {"type": "resistor", "name": "Resistor", "params": {"resistance": 1000}},
+            {"type": "capacitor", "name": "Capacitor", "params": {"capacitance": 1e-6}},
+            {"type": "inductor", "name": "Inductor", "params": {"inductance": 1e-3}}
+        ],
+        "semiconductor": [
+            {"type": "diode", "name": "Diode", "params": {"forward_voltage": 0.7, "reverse_current": 1e-6}},
+            {"type": "mosfet", "name": "MOSFET", "params": {"rds_on": 0.1, "threshold_voltage": 3.0}},
+            {"type": "igbt", "name": "IGBT", "params": {"vce_sat": 2.0, "threshold_voltage": 5.0}}
+        ],
+        "sources": [
+            {"type": "voltage_source", "name": "DC Voltage Source", "params": {"voltage": 12}},
+            {"type": "pwm_source", "name": "PWM Source", "params": {"amplitude": 5, "frequency": 10000, "duty_cycle": 0.5}}
+        ],
+        "converters": [
+            {"type": "buck_converter", "name": "Buck Converter", "params": {}},
+            {"type": "boost_converter", "name": "Boost Converter", "params": {}},
+            {"type": "buck_boost_converter", "name": "Buck-Boost Converter", "params": {}}
+        ]
+    }
+    
+    return jsonify(components)
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,0 +1,212 @@
+<!-- templates/library.html -->
+{% extends "base.html" %}
+
+{% block title %}Component Library - Power Electronics Design Tool{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Component Library</h1>
+        <p>Browse our collection of power electronics components and converter topologies.</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <ul class="nav nav-tabs" id="componentTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="passive-tab" data-bs-toggle="tab" data-bs-target="#passive" type="button" role="tab">Passive Components</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="semiconductor-tab" data-bs-toggle="tab" data-bs-target="#semiconductor" type="button" role="tab">Semiconductor Devices</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="sources-tab" data-bs-toggle="tab" data-bs-target="#sources" type="button" role="tab">Sources</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="converters-tab" data-bs-toggle="tab" data-bs-target="#converters" type="button" role="tab">Converter Topologies</button>
+            </li>
+        </ul>
+        
+        <div class="tab-content mt-3" id="componentTabContent">
+            <div class="tab-pane fade show active" id="passive" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Resistor</h5>
+                                <p class="card-text">A passive component that limits current flow.</p>
+                                <h6>Parameters:</h6>
+                                <ul>
+                                    <li>Resistance (ohms)</li>
+                                    <li>Power Rating (watts)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Capacitor</h5>
+                                <p class="card-text">Stores energy in an electric field.</p>
+                                <h6>Parameters:</h6>
+                                <ul>
+                                    <li>Capacitance (farads)</li>
+                                    <li>Voltage Rating</li>
+                                    <li>ESR (Equivalent Series Resistance)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Inductor</h5>
+                                <p class="card-text">Stores energy in a magnetic field.</p>
+                                <h6>Parameters:</h6>
+                                <ul>
+                                    <li>Inductance (henries)</li>
+                                    <li>Current Rating</li>
+                                    <li>DC Resistance</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-pane fade" id="semiconductor" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Diode</h5>
+                                <p class="card-text">Allows current to flow in one direction only.</p>
+                                <h6>Parameters:</h6>
+                                <ul>
+                                    <li>Forward Voltage</li>
+                                    <li>Reverse Current</li>
+                                    <li>Current Rating</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">MOSFET</h5>
+                                <p class="card-text">Voltage-controlled switch for power electronics.</p>
+                                <h6>Parameters:</h6>
+                                <ul>
+                                    <li>Rds(on) - On-state Resistance</li>
+                                    <li>Threshold Voltage</li>
+                                    <li>Current Rating</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">IGBT</h5>
+                                <p class="card-text">Combines MOSFET and BJT characteristics for high power applications.</p>
+                                <h6>Parameters:</h6>
+                                <ul>
+                                    <li>Vce(sat) - Saturation Voltage</li>
+                                    <li>Threshold Voltage</li>
+                                    <li>Current Rating</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-pane fade" id="sources" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">DC Voltage Source</h5>
+                                <p class="card-text">Provides constant voltage.</p>
+                                <h6>Parameters:</h6>
+                                <ul>
+                                    <li>Voltage (V)</li>
+                                    <li>Maximum Current</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">PWM Source</h5>
+                                <p class="card-text">Generates pulse-width modulated signal for switch control.</p>
+                                <h6>Parameters:</h6>
+                                <ul>
+                                    <li>Amplitude</li>
+                                    <li>Frequency</li>
+                                    <li>Duty Cycle</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-pane fade" id="converters" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Buck Converter</h5>
+                                <p class="card-text">Step-down DC-DC converter.</p>
+                                <h6>Components:</h6>
+                                <ul>
+                                    <li>Switch (MOSFET/IGBT)</li>
+                                    <li>Diode</li>
+                                    <li>Inductor</li>
+                                    <li>Capacitor</li>
+                                    <li>Load</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Boost Converter</h5>
+                                <p class="card-text">Step-up DC-DC converter.</p>
+                                <h6>Components:</h6>
+                                <ul>
+                                    <li>Switch (MOSFET/IGBT)</li>
+                                    <li>Diode</li>
+                                    <li>Inductor</li>
+                                    <li>Capacitor</li>
+                                    <li>Load</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Buck-Boost Converter</h5>
+                                <p class="card-text">Can step voltage up or down.</p>
+                                <h6>Components:</h6>
+                                <ul>
+                                    <li>Switch (MOSFET/IGBT)</li>
+                                    <li>Diode</li>
+                                    <li>Inductor</li>
+                                    <li>Capacitor</li>
+                                    <li>Load</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

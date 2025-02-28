@@ -1,0 +1,157 @@
+<!-- templates/editor.html -->
+{% extends "base.html" %}
+
+{% block title %}Circuit Editor - Power Electronics Design Tool{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/editor.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Circuit Editor</h1>
+        <div class="alert alert-info">
+            Drag components from the palette to the canvas to build your circuit.
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                Component Palette
+            </div>
+            <div class="card-body">
+                <div id="component-palette" class="component-palette">
+                    <!-- Components will be loaded here dynamically -->
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                Properties
+            </div>
+            <div class="card-body">
+                <form id="component-properties">
+                    <div class="mb-3">
+                        <label for="component-name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="component-name" disabled>
+                    </div>
+                    <div id="dynamic-properties">
+                        <!-- Dynamic properties will be loaded here -->
+                    </div>
+                    <button type="button" class="btn btn-primary" id="apply-properties" disabled>Apply</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between">
+                    <span>Circuit Canvas</span>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="btn-save">Save</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="btn-load">Load</button>
+                        <button type="button" class="btn btn-success btn-sm" id="btn-simulate">Simulate</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="circuit-canvas" class="circuit-canvas">
+                    <!-- Circuit will be drawn here -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3" id="simulation-results" style="display: none;">
+            <div class="card-header">
+                Simulation Results
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="simulation-plot" id="main-plot"></div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">Voltages</div>
+                            <div class="card-body">
+                                <div class="simulation-plot" id="voltage-plot"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">Currents</div>
+                            <div class="card-body">
+                                <div class="simulation-plot" id="current-plot"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Save Modal -->
+        <div class="modal fade" id="saveModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Save Circuit</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="save-filename" class="form-label">Filename</label>
+                            <input type="text" class="form-control" id="save-filename" value="circuit.json">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="save-confirm">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Load Modal -->
+        <div class="modal fade" id="loadModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Load Circuit</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="load-file" class="form-label">Select File</label>
+                            <input type="file" class="form-control" id="load-file" accept=".json">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="load-confirm">Load</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsplumb/2.15.6/js/jsplumb.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.20.0/plotly.min.js"></script>
+<script src="{{ url_for('static', filename='js/circuit_editor.js') }}"></script>
+<script src="{{ url_for('static', filename='js/simulation.js') }}"></script>
+{% endblock %}
