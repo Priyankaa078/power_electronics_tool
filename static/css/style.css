@@ -1,0 +1,48 @@
+/* static/css/style.css */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+.jumbotron {
+    padding: 2rem;
+    background-color: #e9ecef;
+    border-radius: 0.3rem;
+    margin-bottom: 2rem;
+}
+
+/* Component library styles */
+.component-card {
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+.component-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Circuit editor styles */
+.component-palette {
+    min-height: 300px;
+}
+
+.circuit-canvas {
+    min-height: 600px;
+    border: 1px solid #ddd;
+    background-color: #f8f9fa;
+    position: relative;
+    overflow: auto;
+}
+
+.simulation-plot {
+    width: 100%;
+    height: 300px;
+    border: 1px solid #ddd;
+}
+

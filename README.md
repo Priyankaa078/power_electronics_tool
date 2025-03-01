@@ -1,4 +1,5 @@
 # Project structure
+'''
 power_electronics_tool/
 │
 ├── app.py                     # Main Flask application
@@ -37,15 +38,3 @@ power_electronics_tool/
         └── converters.py      # Converter topologies
 '''
 
-# requirements.txt
-'''
-Flask==2.3.3
-Flask-WTF==1.1.1
-numpy==1.24.3
-scipy==1.10.1
-matplotlib==3.7.2
-networkx==3.1
-sympy==1.12
-pandas==2.0.3
-plotly==5.16.0
-'''
